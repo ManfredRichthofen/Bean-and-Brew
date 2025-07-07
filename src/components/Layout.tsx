@@ -15,7 +15,7 @@ export function Layout({ children, currentPage = 'home' }: LayoutProps) {
       </main>
       <footer className="footer footer-center p-4 bg-base-100 text-base-content mt-8">
         <aside>
-          <p>© {new Date().getFullYear()} Beans App. Powered by React, Tailwind, DaisyUI.</p>
+          <p>© {new Date().getFullYear()} Bean & Brew Database</p>
         </aside>
       </footer>
     </div>

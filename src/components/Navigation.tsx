@@ -9,7 +9,7 @@ export function Navigation({ currentPage = 'home' }: NavigationProps) {
   return (
     <nav className="navbar bg-base-100 shadow mb-6">
       <div className="container mx-auto flex justify-between items-center px-4">
-        <Link to="/" className="btn btn-ghost text-xl">Beans App</Link>
+        <Link to="/" className="btn btn-ghost text-xl">Bean & Brew Database</Link>
         <div className="flex gap-2 items-center">
           <Link 
             to="/" 
