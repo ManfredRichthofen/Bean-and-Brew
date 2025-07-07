@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FiChevronUp, FiChevronDown, FiExternalLink } from 'react-icons/fi'
+import { FiChevronUp, FiChevronDown, FiExternalLink, FiEye, FiEyeOff } from 'react-icons/fi'
 import { FaStar } from 'react-icons/fa'
 import { FaStarHalfStroke } from 'react-icons/fa6'
 import type { CoffeeBean } from '../utils/sheets'
@@ -17,6 +17,8 @@ export function DataTable({ data, loading, error }: DataTableProps) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [selectedCoffee, setSelectedCoffee] = useState<CoffeeBean | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [hiddenColumns, setHiddenColumns] = useState<Set<keyof CoffeeBean>>(new Set())
+  const [showColumnToggle, setShowColumnToggle] = useState(false)
   const headers = getColumnHeaders()
 
   const handleSort = (column: keyof CoffeeBean) => {
@@ -38,6 +40,17 @@ export function DataTable({ data, loading, error }: DataTableProps) {
     setSelectedCoffee(null)
   }
 
+  const toggleColumn = (columnKey: keyof CoffeeBean) => {
+    const newHiddenColumns = new Set(hiddenColumns)
+    if (newHiddenColumns.has(columnKey)) {
+      newHiddenColumns.delete(columnKey)
+    } else {
+      newHiddenColumns.add(columnKey)
+    }
+    setHiddenColumns(newHiddenColumns)
+  }
+
+  const visibleHeaders = headers.filter(header => !hiddenColumns.has(header.key))
   const sortedData = sortData(data, sortBy, sortOrder)
 
   const formatDate = (dateString: string) => {
@@ -101,10 +114,45 @@ export function DataTable({ data, loading, error }: DataTableProps) {
 
   return (
     <div className="overflow-x-auto rounded-lg border border-base-200">
-      <table className="table table-zebra w-full">
+      {/* Column Visibility Toggle */}
+      <div className="bg-base-200 p-2 border-b border-base-300">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setShowColumnToggle(!showColumnToggle)}
+            className="btn btn-ghost btn-sm"
+          >
+            {showColumnToggle ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+            Columns
+          </button>
+          {hiddenColumns.size > 0 && (
+            <span className="text-xs text-base-content/70">
+              {hiddenColumns.size} hidden
+            </span>
+          )}
+        </div>
+        
+        {showColumnToggle && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {headers.map((header) => (
+              <label key={header.key} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!hiddenColumns.has(header.key)}
+                  onChange={() => toggleColumn(header.key)}
+                  className="checkbox checkbox-sm"
+                />
+                <span className="text-sm">{header.label}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className={`transition-all duration-300 ${hiddenColumns.size > 0 ? 'max-w-fit mx-auto' : 'w-full'}`}>
+        <table className={`table table-zebra ${hiddenColumns.size > 0 ? 'w-auto' : 'w-full'}`}>
         <thead className="bg-base-300">
           <tr>
-            {headers.map((header) => (
+            {visibleHeaders.map((header) => (
               <th 
                 key={header.key} 
                 className={`font-semibold text-base min-w-0 ${header.sortable ? 'cursor-pointer hover:bg-base-200' : ''}`}
@@ -126,91 +174,124 @@ export function DataTable({ data, loading, error }: DataTableProps) {
         <tbody>
           {sortedData.map((bean) => (
             <tr key={bean.id} className="hover:bg-base-100 cursor-pointer" onClick={() => handleRowClick(bean)}>
-              <td className="font-medium min-w-0">
-                <div className="flex flex-col">
-                  <span className="font-semibold truncate" title={bean.beanName || '-'}>
-                    {bean.beanName && bean.beanName.length > 25 
-                      ? `${bean.beanName.substring(0, 25)}...` 
-                      : bean.beanName || '-'}
-                  </span>
-                  {bean.origin && (
-                    <span className="text-xs text-base-content/70 truncate">{bean.origin}</span>
-                  )}
-                </div>
-              </td>
-              <td className="min-w-0">
-                <div className="flex flex-col">
-                  <span className="truncate">{bean.caffeine || '-'}</span>
-                </div>
-              </td>
-              <td className="min-w-0">
-                <div className="flex items-center gap-2">
-                  {bean.roastLevel ? (
-                    <div className="badge badge-outline badge-sm flex-shrink-0">
-                      {formatRoastLevel(bean.roastLevel)}
-                    </div>
-                  ) : (
-                    <span>-</span>
-                  )}
-                </div>
-              </td>
-              <td className="min-w-0">
-                <span className="truncate">{formatDate(bean.roastDate)}</span>
-              </td>
-              <td className="min-w-0">
-                <div className="flex flex-col">
-                  <span className="font-medium truncate">{bean.roaster || '-'}</span>
-                  {bean.roasterCity && (
-                    <span className="text-xs text-base-content/70 truncate">{bean.roasterCity}</span>
-                  )}
-                </div>
-              </td>
-              <td className="min-w-0">
-                <span className="truncate">{bean.roasterCountry || '-'}</span>
-              </td>
-              <td className="min-w-0">
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium truncate">{formatRating(bean.rating)}</span>
-                    {bean.rating && (
-                      <div className="flex gap-0.5 flex-shrink-0">
-                        {[1, 2, 3, 4, 5].map((star) => {
-                          const ratingValue = getStarRating(bean.rating)
-                          const isFullStar = ratingValue >= star
-                          const isHalfStar = ratingValue >= star - 0.5 && ratingValue < star
-                          
-                          if (isHalfStar) {
-                            return (
-                              <FaStarHalfStroke key={star} className="text-orange-400 text-sm" />
-                            )
-                          }
-                          
-                          if (isFullStar) {
-                            return (
-                              <FaStar key={star} className="text-orange-400 text-sm" />
-                            )
-                          }
-                          
-                          return (
-                            <FaStar key={star} className="text-gray-300 text-sm" />
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                  {bean.tastingNotes && (
-                    <span className="text-xs text-base-content/70 line-clamp-1">{bean.tastingNotes}</span>
-                  )}
-                </div>
-              </td>
-              <td className="min-w-0">
-                <div className="flex flex-col">
-                  <span className="font-medium truncate">{formatPrice(bean.price, bean.currency)}</span>
-                </div>
-              </td>
-              <td className="min-w-0">
-                <span className="truncate">{bean.weight ? `${bean.weight}g` : '-'}</span>
-              </td>
+              {visibleHeaders.map((header) => {
+                switch (header.key) {
+                  case 'beanName':
+                    return (
+                      <td key={header.key} className="font-medium min-w-0">
+                        <div className="flex flex-col">
+                          <span className="font-semibold truncate" title={bean.beanName || '-'}>
+                            {bean.beanName && bean.beanName.length > 25 
+                              ? `${bean.beanName.substring(0, 25)}...` 
+                              : bean.beanName || '-'}
+                          </span>
+                          {bean.origin && (
+                            <span className="text-xs text-base-content/70 truncate">{bean.origin}</span>
+                          )}
+                        </div>
+                      </td>
+                    )
+                  case 'caffeine':
+                    return (
+                      <td key={header.key} className="min-w-0">
+                        <div className="flex flex-col">
+                          <span className="truncate">{bean.caffeine || '-'}</span>
+                        </div>
+                      </td>
+                    )
+                  case 'roastLevel':
+                    return (
+                      <td key={header.key} className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          {bean.roastLevel ? (
+                            <div className="badge badge-outline badge-sm flex-shrink-0">
+                              {formatRoastLevel(bean.roastLevel)}
+                            </div>
+                          ) : (
+                            <span>-</span>
+                          )}
+                        </div>
+                      </td>
+                    )
+                  case 'roastDate':
+                    return (
+                      <td key={header.key} className="min-w-0">
+                        <span className="truncate">{formatDate(bean.roastDate)}</span>
+                      </td>
+                    )
+                  case 'roaster':
+                    return (
+                      <td key={header.key} className="min-w-0">
+                        <div className="flex flex-col">
+                          <span className="font-medium truncate">{bean.roaster || '-'}</span>
+                          {bean.roasterCity && (
+                            <span className="text-xs text-base-content/70 truncate">{bean.roasterCity}</span>
+                          )}
+                        </div>
+                      </td>
+                    )
+                  case 'roasterCountry':
+                    return (
+                      <td key={header.key} className="min-w-0">
+                        <span className="truncate">{bean.roasterCountry || '-'}</span>
+                      </td>
+                    )
+                  case 'rating':
+                    return (
+                      <td key={header.key} className="min-w-0">
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium truncate">{formatRating(bean.rating)}</span>
+                            {bean.rating && (
+                              <div className="flex gap-0.5 flex-shrink-0">
+                                {[1, 2, 3, 4, 5].map((star) => {
+                                  const ratingValue = getStarRating(bean.rating)
+                                  const isFullStar = ratingValue >= star
+                                  const isHalfStar = ratingValue >= star - 0.5 && ratingValue < star
+                                  
+                                  if (isHalfStar) {
+                                    return (
+                                      <FaStarHalfStroke key={star} className="text-orange-400 text-sm" />
+                                    )
+                                  }
+                                  
+                                  if (isFullStar) {
+                                    return (
+                                      <FaStar key={star} className="text-orange-400 text-sm" />
+                                    )
+                                  }
+                                  
+                                  return (
+                                    <FaStar key={star} className="text-gray-300 text-sm" />
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+                          {bean.tastingNotes && (
+                            <span className="text-xs text-base-content/70 line-clamp-1">{bean.tastingNotes}</span>
+                          )}
+                        </div>
+                      </td>
+                    )
+                  case 'price':
+                    return (
+                      <td key={header.key} className="min-w-0">
+                        <div className="flex flex-col">
+                          <span className="font-medium truncate">{formatPrice(bean.price, bean.currency)}</span>
+                        </div>
+                      </td>
+                    )
+                  case 'weight':
+                    return (
+                      <td key={header.key} className="min-w-0">
+                        <span className="truncate">{bean.weight ? `${bean.weight}g` : '-'}</span>
+                      </td>
+                    )
+                  default:
+                    return <td key={header.key} className="min-w-0">-</td>
+                }
+              })}
               {sortedData.some(bean => bean.productUrl) && (
                 <td onClick={(e) => e.stopPropagation()} className="w-12 flex-shrink-0">
                   <div className="flex gap-1">
@@ -232,6 +313,7 @@ export function DataTable({ data, loading, error }: DataTableProps) {
           ))}
         </tbody>
       </table>
+      </div>
       {sortedData.length === 0 && (
         <div className="text-center py-8 text-base-content/70">
           No coffee beans found matching your criteria.
