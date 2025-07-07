@@ -5,7 +5,7 @@ export function AboutPage() {
     <div className="card bg-base-100 shadow-xl p-6">
       <h1 className="text-3xl font-bold mb-4">About Beans App</h1>
       <p className="mb-4">
-        This app displays data from a public Google Sheet with live filtering, styled using Tailwind CSS and DaisyUI. Built with React and TanStack Router.
+        This app displays data from a public Google Sheet with live filtering Built with React and TanStack Router.
       </p>
       <p className="mb-4">
         <b>Features:</b>
