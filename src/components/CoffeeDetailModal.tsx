@@ -1,4 +1,6 @@
 import { FiX, FiExternalLink, FiMapPin, FiStar, FiDollarSign, FiCoffee } from 'react-icons/fi'
+import { FaStar } from 'react-icons/fa'
+import { FaStarHalfStroke } from 'react-icons/fa6'
 import type { CoffeeBean } from '../utils/sheets'
 
 interface CoffeeDetailModalProps {
@@ -49,7 +51,8 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
     if (!rating) return 0
     const num = parseFloat(rating)
     if (isNaN(num)) return 0
-    return Math.round((num / 10) * 5)
+    // Convert 10-point scale to 5-point scale for stars (each point = half star)
+    return (num / 10) * 5
   }
 
   const formatRoastLevel = (roastLevel: string) => {
@@ -280,17 +283,28 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{formatRating(coffee.rating)}</span>
-                      <div className="rating rating-sm">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <input
-                            key={star}
-                            type="radio"
-                            name={`modal-rating-${coffee.id}`}
-                            className="mask mask-star-2 bg-orange-400"
-                            checked={getStarRating(coffee.rating) === star}
-                            readOnly
-                          />
-                        ))}
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const ratingValue = getStarRating(coffee.rating)
+                          const isFullStar = ratingValue >= star
+                          const isHalfStar = ratingValue >= star - 0.5 && ratingValue < star
+                          
+                          if (isHalfStar) {
+                            return (
+                              <FaStarHalfStroke key={star} className="text-orange-400 text-sm" />
+                            )
+                          }
+                          
+                          if (isFullStar) {
+                            return (
+                              <FaStar key={star} className="text-orange-400 text-sm" />
+                            )
+                          }
+                          
+                          return (
+                            <FaStar key={star} className="text-gray-300 text-sm" />
+                          )
+                        })}
                       </div>
                     </div>
                   </div>
