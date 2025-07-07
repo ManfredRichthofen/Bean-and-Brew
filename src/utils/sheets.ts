@@ -48,8 +48,6 @@ export async function fetchSheetData(): Promise<CoffeeBean[]> {
     let currentRow: string[] = []
     let currentField = ''
     let inQuotes = false
-    let rowIndex = 0
-    
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex]
       

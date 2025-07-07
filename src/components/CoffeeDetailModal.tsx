@@ -1,4 +1,4 @@
-import { FiX, FiExternalLink, FiCalendar, FiMapPin, FiStar, FiDollarSign, FiPackage, FiCoffee } from 'react-icons/fi'
+import { FiX, FiExternalLink, FiMapPin, FiStar, FiDollarSign, FiCoffee } from 'react-icons/fi'
 import type { CoffeeBean } from '../utils/sheets'
 
 interface CoffeeDetailModalProps {
