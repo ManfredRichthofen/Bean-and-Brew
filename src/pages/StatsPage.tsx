@@ -336,7 +336,7 @@ export function StatsPage() {
                   fill="#8884d8"
                   dataKey="count"
                 >
-                  {ratingDistribution.map((entry, index) => (
+                  {ratingDistribution.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -365,7 +365,7 @@ export function StatsPage() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {topOrigins.map((entry, index) => (
+                  {topOrigins.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -474,7 +474,7 @@ export function StatsPage() {
                   fill="#8884d8"
                   dataKey="count"
                 >
-                  {roastLevelDistribution.map((entry, index) => (
+                  {roastLevelDistribution.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
