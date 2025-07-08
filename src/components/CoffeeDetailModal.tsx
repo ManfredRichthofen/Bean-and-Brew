@@ -75,35 +75,35 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box max-w-2xl">
+      <div className="modal-box max-w-2xl w-11/12 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h3 className="text-2xl font-bold text-primary">{coffee.beanName}</h3>
-            <p className="text-base-content/70 flex items-center gap-1 mt-1">
-              <FiMapPin className="w-4 h-4" />
-              {coffee.origin}
+        <div className="flex justify-between items-start mb-4 sm:mb-6">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl sm:text-2xl font-bold text-primary truncate">{coffee.beanName}</h3>
+            <p className="text-base-content/70 flex items-center gap-1 mt-1 text-sm">
+              <FiMapPin className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">{coffee.origin}</span>
             </p>
           </div>
           <button 
             onClick={onClose}
-            className="btn btn-ghost btn-circle btn-sm"
+            className="btn btn-ghost btn-circle btn-sm flex-shrink-0 ml-2"
           >
             <FiX className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="card bg-base-100 shadow-sm">
-              <div className="card-body p-4">
-                <h4 className="card-title text-lg flex items-center gap-2">
-                  <FiCoffee className="w-5 h-5" />
+              <div className="card-body p-3 sm:p-4">
+                <h4 className="card-title text-base sm:text-lg flex items-center gap-2">
+                  <FiCoffee className="w-4 h-4 sm:w-5 sm:h-5" />
                   Coffee Details
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-2 text-sm">
                   {coffee.caffeine && (
                     <div>
                       <span className="font-medium">Caffeine:</span> {coffee.caffeine}
@@ -129,12 +129,12 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
             </div>
 
             <div className="card bg-base-100 shadow-sm">
-              <div className="card-body p-4">
-                <h4 className="card-title text-lg flex items-center gap-2">
-                  <FiMapPin className="w-5 h-5" />
+              <div className="card-body p-3 sm:p-4">
+                <h4 className="card-title text-base sm:text-lg flex items-center gap-2">
+                  <FiMapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                   Roaster Info
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-2 text-sm">
                   {coffee.roaster && (
                     <div>
                       <span className="font-medium">Roaster:</span> {coffee.roaster}
@@ -158,12 +158,12 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
           {/* Pricing Info - Only show if there's pricing data */}
           {(coffee.price || coffee.weight || coffee.costPer100g || coffee.costPerPound) && (
             <div className="card bg-base-100 shadow-sm">
-              <div className="card-body p-4">
-                <h4 className="card-title text-lg flex items-center gap-2">
-                  <FiDollarSign className="w-5 h-5" />
+              <div className="card-body p-3 sm:p-4">
+                <h4 className="card-title text-base sm:text-lg flex items-center gap-2">
+                  <FiDollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
                   Purchase Information
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
                   {coffee.price && (
                     <div>
                       <span className="font-medium">Price Paid:</span> {formatPrice(coffee.price, coffee.currency)}
@@ -192,9 +192,9 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
           {/* Brewing Details - Only show if there's brewing data */}
           {(coffee.dose || coffee.yield || coffee.brewRatio || coffee.shotTime || coffee.waterTemperature || coffee.grindSetting) && (
             <div className="card bg-base-100 shadow-sm">
-              <div className="card-body p-4">
-                <h4 className="card-title text-lg">Brewing Details</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="card-body p-3 sm:p-4">
+                <h4 className="card-title text-base sm:text-lg">Brewing Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
                   {coffee.dose && (
                     <div>
                       <span className="font-medium">Dose:</span> {coffee.dose}g
@@ -233,9 +233,9 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
           {/* Equipment - Only show if there's equipment data */}
           {(coffee.espressoMachine || coffee.grinder || coffee.basketSpecs || coffee.profile) && (
             <div className="card bg-base-100 shadow-sm">
-              <div className="card-body p-4">
-                <h4 className="card-title text-lg">Equipment</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="card-body p-3 sm:p-4">
+                <h4 className="card-title text-base sm:text-lg">Equipment</h4>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   {coffee.espressoMachine && (
                     <div>
                       <span className="font-medium">Espresso Machine:</span> {coffee.espressoMachine}
@@ -264,25 +264,25 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
           {/* Additional Workflow */}
           {coffee.additionalWorkflow && (
             <div className="card bg-base-100 shadow-sm">
-              <div className="card-body p-4">
-                <h4 className="card-title text-lg">Additional Workflow/Equipment</h4>
-                <p className="text-base-content/80">{coffee.additionalWorkflow}</p>
+              <div className="card-body p-3 sm:p-4">
+                <h4 className="card-title text-base sm:text-lg">Additional Workflow/Equipment</h4>
+                <p className="text-base-content/80 text-sm">{coffee.additionalWorkflow}</p>
               </div>
             </div>
           )}
 
           {/* Rating and Tasting Notes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {coffee.rating && (
               <div className="card bg-base-100 shadow-sm">
-                <div className="card-body p-4">
-                  <h4 className="card-title text-lg flex items-center gap-2">
-                    <FiStar className="w-5 h-5" />
+                <div className="card-body p-3 sm:p-4">
+                  <h4 className="card-title text-base sm:text-lg flex items-center gap-2">
+                    <FiStar className="w-4 h-4 sm:w-5 sm:h-5" />
                     Rating
                   </h4>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{formatRating(coffee.rating)}</span>
+                      <span className="font-medium text-sm">{formatRating(coffee.rating)}</span>
                       <div className="flex gap-0.5">
                         {[1, 2, 3, 4, 5].map((star) => {
                           const ratingValue = getStarRating(coffee.rating)
@@ -314,9 +314,9 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
 
             {coffee.tastingNotes && (
               <div className="card bg-base-100 shadow-sm">
-                <div className="card-body p-4">
-                  <h4 className="card-title text-lg">Tasting Notes</h4>
-                  <p className="text-base-content/80">{coffee.tastingNotes}</p>
+                <div className="card-body p-3 sm:p-4">
+                  <h4 className="card-title text-base sm:text-lg">Tasting Notes</h4>
+                  <p className="text-base-content/80 text-sm">{coffee.tastingNotes}</p>
                 </div>
               </div>
             )}
@@ -325,9 +325,9 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
           {/* Reddit Username */}
           {coffee.redditUsername && (
             <div className="card bg-base-100 shadow-sm">
-              <div className="card-body p-4">
-                <h4 className="card-title text-lg">Submitted By</h4>
-                <p className="text-base-content/80">u/{coffee.redditUsername}</p>
+              <div className="card-body p-3 sm:p-4">
+                <h4 className="card-title text-base sm:text-lg">Submitted By</h4>
+                <p className="text-base-content/80 text-sm">u/{coffee.redditUsername}</p>
               </div>
             </div>
           )}
@@ -339,7 +339,7 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
                 href={coffee.productUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-primary"
+                className="btn btn-primary w-full sm:w-auto"
               >
                 <FiExternalLink className="w-4 h-4 mr-2" />
                 View Product
@@ -350,7 +350,7 @@ export function CoffeeDetailModal({ coffee, isOpen, onClose }: CoffeeDetailModal
 
         {/* Footer */}
         <div className="modal-action">
-          <button className="btn" onClick={onClose}>
+          <button className="btn w-full sm:w-auto" onClick={onClose}>
             Close
           </button>
         </div>

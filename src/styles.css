@@ -14,3 +14,56 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  /* Improve touch targets */
+  .btn {
+    min-height: 44px;
+  }
+  
+  /* Better scrolling on mobile */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px;
+  }
+  
+  /* Better modal handling on mobile */
+  .modal-box {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  /* Improve card touch interactions */
+  .card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .card:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Ensure proper viewport handling */
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better focus indicators for accessibility */
+.btn:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
+}

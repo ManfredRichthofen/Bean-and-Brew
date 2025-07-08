@@ -24,11 +24,11 @@ export function HomePage() {
   }, [])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Coffee Bean Database</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Coffee Bean Database</h1>
           <p className="text-base-content/70 mt-1">
             {loading ? 'Loading...' : `${filteredData.length} beans found`}
           </p>
@@ -37,7 +37,7 @@ export function HomePage() {
           href="https://forms.gle/yAxGKATMwKeL7Xmy8" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="btn btn-primary"
+          className="btn btn-primary w-full sm:w-auto"
         >
           Submit New Beans
         </a>

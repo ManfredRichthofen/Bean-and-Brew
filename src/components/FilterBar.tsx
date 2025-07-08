@@ -66,7 +66,7 @@ export function FilterBar({ data, onFilterChange }: FilterBarProps) {
   return (
     <div className="space-y-4">
       {/* Search Bar */}
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <div className="flex-1 relative">
           <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
           <input
@@ -77,25 +77,28 @@ export function FilterBar({ data, onFilterChange }: FilterBarProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button
-          className={`btn ${showFilters ? 'btn-primary' : 'btn-outline'}`}
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          <FiFilter className="w-4 h-4" />
-          Filters
-        </button>
-        {hasActiveFilters && (
-          <button className="btn btn-ghost" onClick={clearFilters}>
-            <FiX className="w-4 h-4" />
-            Clear
+        <div className="flex gap-2">
+          <button
+            className={`btn flex-1 sm:flex-none ${showFilters ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <FiFilter className="w-4 h-4" />
+            <span className="hidden sm:inline">Filters</span>
+            <span className="sm:hidden">Filter</span>
           </button>
-        )}
+          {hasActiveFilters && (
+            <button className="btn btn-ghost" onClick={clearFilters}>
+              <FiX className="w-4 h-4" />
+              <span className="hidden sm:inline">Clear</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Advanced Filters */}
       {showFilters && (
         <div className="card bg-base-100 shadow-sm p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Origin Filter */}
             <div className="form-control">
               <label className="label">
@@ -131,7 +134,7 @@ export function FilterBar({ data, onFilterChange }: FilterBarProps) {
             </div>
 
             {/* Rating Filter */}
-            <div className="form-control">
+            <div className="form-control sm:col-span-2 lg:col-span-1">
               <label className="label">
                 <span className="label-text font-medium">Min Rating</span>
               </label>
