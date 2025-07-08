@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { fetchSheetData } from '../utils/sheets'
 import type { CoffeeBean } from '../utils/sheets'
 import { DataTable } from '../components/DataTable'
@@ -33,14 +34,22 @@ export function HomePage() {
             {loading ? 'Loading...' : `${filteredData.length} beans found`}
           </p>
         </div>
-        <a 
-          href="https://forms.gle/yAxGKATMwKeL7Xmy8" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="btn btn-primary w-full sm:w-auto"
-        >
-          Submit New Beans
-        </a>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Link 
+            to="/stats" 
+            className="btn btn-secondary w-full sm:w-auto"
+          >
+            View Statistics
+          </Link>
+          <a 
+            href="https://forms.gle/yAxGKATMwKeL7Xmy8" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="btn btn-primary w-full sm:w-auto"
+          >
+            Submit New Beans
+          </a>
+        </div>
       </div>
 
       {/* Filters */}

@@ -3,7 +3,7 @@ import { Navigation } from './Navigation'
 
 interface LayoutProps {
   children: ReactNode
-  currentPage?: 'home' | 'about'
+  currentPage?: 'home' | 'about' | 'stats'
 }
 
 export function Layout({ children, currentPage = 'home' }: LayoutProps) {

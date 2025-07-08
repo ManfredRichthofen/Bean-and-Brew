@@ -4,7 +4,7 @@ import { FiMenu, FiX } from 'react-icons/fi'
 import { ThemeToggle } from './ThemeToggle'
 
 interface NavigationProps {
-  currentPage?: 'home' | 'about'
+  currentPage?: 'home' | 'about' | 'stats'
 }
 
 export function Navigation({ currentPage = 'home' }: NavigationProps) {
@@ -62,6 +62,12 @@ export function Navigation({ currentPage = 'home' }: NavigationProps) {
           >
             About
           </Link>
+          <Link 
+            to="/stats" 
+            className={`btn btn-ghost btn-sm ${currentPage === 'stats' ? 'btn-active' : ''}`}
+          >
+            Stats
+          </Link>
           <ThemeToggle />
         </div>
 
@@ -97,6 +103,13 @@ export function Navigation({ currentPage = 'home' }: NavigationProps) {
                 onClick={closeMenu}
               >
                 About
+              </Link>
+              <Link 
+                to="/stats" 
+                className={`btn btn-ghost justify-start text-left ${currentPage === 'stats' ? 'btn-active' : ''}`}
+                onClick={closeMenu}
+              >
+                Stats
               </Link>
             </div>
           </div>
