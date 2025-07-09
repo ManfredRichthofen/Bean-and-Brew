@@ -41,52 +41,20 @@ const ROASTER_STANDARDIZATION: Record<string, string> = {
   'verve coffee': 'Verve',
   'verve coffee roasters': 'Verve',
   
-  // Heart variations
-  'heart': 'Heart',
-  'heart coffee': 'Heart',
-  'heart coffee roasters': 'Heart',
-  
   // Onyx variations
   'onyx': 'Onyx',
   'onyx coffee': 'Onyx',
   'onyx coffee lab': 'Onyx',
-  
-  // Ritual variations
-  'ritual': 'Ritual',
-  'ritual coffee': 'Ritual',
-  'ritual coffee roasters': 'Ritual',
-  
-  // Sightglass variations
-  'sightglass': 'Sightglass',
-  'sightglass coffee': 'Sightglass',
-  'sight glass': 'Sightglass',
-  'sight glass coffee': 'Sightglass',
   
   // Four Barrel variations
   'four barrel': 'Four Barrel',
   'four barrel coffee': 'Four Barrel',
   '4 barrel': 'Four Barrel',
   '4 barrel coffee': 'Four Barrel',
-  
-  // Philz variations
-  'philz': 'Philz',
-  'philz coffee': 'Philz',
-  'philz coffee & tea': 'Philz',
-  
-  // Peet's variations
-  'peets': "Peet's",
-  'peet\'s': "Peet's",
-  'peet\'s coffee': "Peet's",
-  'peets coffee': "Peet's",
-  'peet\'s coffee & tea': "Peet's",
-  
-  // Local roasters with common variations
-  'local roaster': 'Local Roaster',
-  'local coffee': 'Local Roaster',
-  'small batch': 'Small Batch',
-  'small batch roaster': 'Small Batch',
-  'artisan': 'Artisan',
-  'artisan roaster': 'Artisan',
+
+  //Café du Jour
+  'cafe du jour': 'Café du Jour',
+  'cafedujour': 'Café du Jour',
 }
 
 // Standardization mappings for origin names
