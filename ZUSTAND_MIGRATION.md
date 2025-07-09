@@ -90,7 +90,7 @@ const standardizedBeans = useCoffeeStore(state => state.standardizedBeans)
 The initial bundle was loading all components and libraries (including heavy chart libraries) upfront, causing slower initial page loads.
 
 ### Solution
-Implemented comprehensive code splitting and lazy loading:
+Implemented comprehensive code splitting and lazy loading with consolidated chart bundles:
 
 #### 1. Page-Level Lazy Loading
 ```typescript
@@ -124,12 +124,15 @@ export const DataTableWithSuspense = (props: any) => (
 )
 ```
 
-#### 3. Individual Chart Code Splitting
-Each chart type is now in its own file for maximum optimization:
+#### 3. Consolidated Chart Bundle
+All chart components are consolidated into a single bundle for optimal performance:
 
 ```typescript
-// src/components/charts/TopRoastersChart.tsx
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+// src/components/ChartsBundle.tsx
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, LineChart, Line, Area
+} from 'recharts'
 
 export const TopRoastersChart = ({ data }: { data: any[] }) => (
   <ResponsiveContainer width="100%" height={350}>
@@ -139,24 +142,56 @@ export const TopRoastersChart = ({ data }: { data: any[] }) => (
   </ResponsiveContainer>
 )
 
-// Individual lazy-loaded chart components
+// All other chart components exported from same file
+export const RatingDistributionChart = ({ data }: { data: any[] }) => (/* ... */)
+export const TopOriginsChart = ({ data }: { data: any[] }) => (/* ... */)
+// ... etc
+
+// Lazy-loaded chart components all import from the same bundle
 export const LazyTopRoastersChart = lazy(() => 
-  import('./charts/TopRoastersChart').then(module => ({ 
+  import('./ChartsBundle').then(module => ({ 
     default: module.TopRoastersChart 
   }))
 )
 ```
 
-**Chart Files Created:**
-- `TopRoastersChart.tsx` - Bar chart for top roasters
-- `RatingDistributionChart.tsx` - Pie chart for rating distribution  
-- `TopOriginsChart.tsx` - Pie chart for top origins
-- `MonthlyTrendsChart.tsx` - Line chart for monthly trends
-- `TopMachinesChart.tsx` - Bar chart for top machines
-- `TopGrindersChart.tsx` - Bar chart for top grinders
-- `RoastLevelDistributionChart.tsx` - Pie chart for roast levels
+#### 4. Vite Configuration for Manual Chunks
+```typescript
+// vite.config.ts
+build: {
+  rollupOptions: {
+    output: {
+      manualChunks(id) {
+        // Vendor chunks for better caching
+        if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-')) {
+          return 'vendor.charts'
+        }
+        if (id.includes('node_modules/react') || id.includes('node_modules/@tanstack')) {
+          return 'vendor.react'
+        }
+        if (id.includes('node_modules/zustand')) {
+          return 'vendor.zustand'
+        }
+        if (id.includes('node_modules/react-icons')) {
+          return 'vendor.icons'
+        }
+        // App-specific chunks
+        if (id.includes('src/components/ChartsBundle')) {
+          return 'charts.bundle'
+        }
+        if (id.includes('src/pages/StatsPage')) {
+          return 'stats.page'
+        }
+        if (id.includes('src/components/DataTable')) {
+          return 'datatable.component'
+        }
+      }
+    }
+  }
+}
+```
 
-#### 4. Route Updates
+#### 5. Route Updates
 ```typescript
 // Before: Direct imports
 import { HomePage } from '../pages/HomePage'
@@ -167,11 +202,11 @@ import { HomePageWithSuspense } from '../pages/lazy'
 
 ### Performance Impact
 - **🚀 Faster Initial Load**: Only essential components loaded upfront
-- **📦 Smaller Initial Bundle**: Heavy libraries (recharts) loaded on-demand
-- **⚡ Progressive Loading**: Components load as needed with loading skeletons
+- **📦 Optimized Bundles**: Vendor libraries separated for better caching
+- **⚡ Consolidated Chart Loading**: All charts load together in single bundle
 - **🎯 Better User Experience**: Immediate feedback with themed loading states
 - **📱 Mobile Optimized**: Reduced initial payload for mobile users
-- **📊 Granular Chart Loading**: Each chart type loads independently
+- **💾 Shared Dependencies**: D3 & Recharts parsed once, shared in memory
 
 ### Loading States
 - **HomePage**: Coffee-themed loading with bean icon
@@ -180,7 +215,7 @@ import { HomePageWithSuspense } from '../pages/lazy'
 - **DataTable**: Table skeleton with animated rows
 - **Charts**: Chart skeleton with loading spinner
 
-### Bundle Structure After Individual Chart Splitting
+### Bundle Structure After Consolidation
 ```
 Initial Bundle:
 ├── Core app (Layout, Navigation, etc.)
@@ -188,20 +223,26 @@ Initial Bundle:
 ├── Basic utilities
 └── Loading skeletons
 
-Lazy Bundles:
+Vendor Bundles:
+├── vendor.react (React, TanStack Router)
+├── vendor.zustand (Zustand state management)
+├── vendor.icons (React Icons)
+└── vendor.charts (Recharts + D3 - only loads when needed)
+
+App Bundles:
 ├── HomePage + DataTable + FilterBar
 ├── StatsPage (without charts)
 ├── AboutPage
 ├── CoffeeDetailModal
-└── Individual Chart Bundles:
-    ├── TopRoastersChart (BarChart components)
-    ├── RatingDistributionChart (PieChart components)
-    ├── TopOriginsChart (PieChart components)
-    ├── MonthlyTrendsChart (LineChart components)
-    ├── TopMachinesChart (BarChart components)
-    ├── TopGrindersChart (BarChart components)
-    └── RoastLevelDistributionChart (PieChart components)
+└── charts.bundle (All chart components + shared dependencies)
 ```
+
+### Benefits of Consolidated Chart Bundle
+- **Single D3/Recharts Instance**: No duplicate library loading
+- **Shared Memory**: All charts share the same chart library in memory
+- **Better Caching**: Single bundle can be cached more effectively
+- **Reduced Network Requests**: One bundle instead of multiple chart files
+- **Optimized Parsing**: Chart library parsed once for all charts
 
 ## Migration Summary
 ✅ **Complete**: All components migrated to use on-demand standardization
