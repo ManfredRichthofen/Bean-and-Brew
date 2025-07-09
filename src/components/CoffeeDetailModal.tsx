@@ -1,7 +1,7 @@
 import { FiX, FiExternalLink, FiMapPin, FiStar, FiDollarSign, FiCoffee } from 'react-icons/fi'
 import { FaStar } from 'react-icons/fa'
 import { FaStarHalfStroke } from 'react-icons/fa6'
-import type { CoffeeBean } from '../utils/sheets'
+import type { CoffeeBean } from '../types/coffee'
 
 interface CoffeeDetailModalProps {
   coffee: CoffeeBean | null

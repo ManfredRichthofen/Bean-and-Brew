@@ -1,27 +1,26 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { useCoffeeBeans } from '../utils/sheets'
-import type { CoffeeBean } from '../utils/sheets'
 import { DataTable } from '../components/DataTable'
 import { FilterBar } from '../components/FilterBar'
+import { useCoffeeStore } from '../stores/coffeeStore'
+import type { CoffeeBean } from '../types/coffee'
 
 export function HomePage() {
-  const [filteredData, setFilteredData] = useState<CoffeeBean[]>([])
-  const { data: allData = [], isLoading: loading, error } = useCoffeeBeans()
-
-  // Update filtered data when all data changes
-  useEffect(() => {
-    setFilteredData(allData)
-  }, [allData])
+  const { loading } = useCoffeeStore()
+  const allData = useCoffeeStore(state => state.standardizedBeans)
+  const [filteredData, setFilteredData] = useState<CoffeeBean[] | undefined>(undefined)
 
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Coffee Bean Database</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            {filteredData && filteredData.length !== allData.length ? 'Filtered Results' : 'Coffee Bean Database'}
+          </h1>
           <p className="text-base-content/70 mt-1">
-            {loading ? 'Loading...' : `${filteredData.length} beans found`}
+            {loading ? 'Loading...' : `${filteredData ? filteredData.length : allData.length} beans found`}
+            {filteredData && filteredData.length !== allData.length && ` of ${allData.length} total`}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -43,10 +42,10 @@ export function HomePage() {
       </div>
 
       {/* Filters */}
-      <FilterBar data={allData} onFilterChange={setFilteredData} />
+      <FilterBar onFilterChange={setFilteredData} />
 
       {/* Table */}
-      <DataTable data={filteredData} loading={loading} error={error?.message || null} />
+      <DataTable filteredData={filteredData} />
     </div>
   )
 } 

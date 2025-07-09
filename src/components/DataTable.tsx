@@ -1,18 +1,27 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { FiChevronUp, FiChevronDown, FiExternalLink, FiEye, FiEyeOff } from 'react-icons/fi'
 import { FaStar } from 'react-icons/fa'
 import { FaStarHalfStroke } from 'react-icons/fa6'
-import type { CoffeeBean } from '../utils/sheets'
-import { sortData, getColumnHeaders } from '../utils/sheets'
+import type { CoffeeBean } from '../types/coffee'
+import { sortData, getColumnHeaders } from '../types/coffee'
 import { CoffeeDetailModal } from './CoffeeDetailModal'
+import { useCoffeeStore } from '../stores/coffeeStore'
 
 interface DataTableProps {
-  data: CoffeeBean[]
-  loading: boolean
-  error: string | null
+  filteredData?: CoffeeBean[]
 }
 
-export function DataTable({ data, loading, error }: DataTableProps) {
+export function DataTable({ filteredData }: DataTableProps = {}) {
+  const { loading, error, fetchBeans } = useCoffeeStore()
+  const standardizedBeans = useCoffeeStore(state => state.standardizedBeans)
+  
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchBeans()
+  }, [fetchBeans])
+  
+  // Use filtered data if provided, otherwise use standardized data
+  const displayData = filteredData || standardizedBeans
   const [sortBy, setSortBy] = useState<keyof CoffeeBean>('roastDate')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [selectedCoffee, setSelectedCoffee] = useState<CoffeeBean | null>(null)
@@ -21,10 +30,20 @@ export function DataTable({ data, loading, error }: DataTableProps) {
   const [showColumnToggle, setShowColumnToggle] = useState(false)
   const headers = getColumnHeaders()
 
+  // Memoize processed data with derived fields
+  const processedData = useMemo(() => {
+    return displayData.map(bean => ({
+      ...bean,
+      displayName: bean.beanName?.toLowerCase() ?? '',
+      priceValue: parseFloat(bean.price) || 0,
+      roasterLower: bean.roaster?.toLowerCase() ?? '',
+    }))
+  }, [displayData])
+
   // Memoize the sorted data to prevent re-sorting on every render
   const sortedData = useMemo(() => {
-    return sortData(data, sortBy, sortOrder)
-  }, [data, sortBy, sortOrder])
+    return sortData(processedData, sortBy, sortOrder)
+  }, [processedData, sortBy, sortOrder])
 
   const handleSort = (column: keyof CoffeeBean) => {
     if (sortBy === column) {

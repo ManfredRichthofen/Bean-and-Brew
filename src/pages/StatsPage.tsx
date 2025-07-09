@@ -1,12 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useMemo, Suspense, useEffect } from 'react'
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Area
 } from 'recharts'
 import { FiTrendingUp, FiStar, FiMapPin, FiCoffee, FiBarChart2, FiPieChart } from 'react-icons/fi'
-import { useCoffeeBeans } from '../utils/sheets'
-import type { CoffeeBean } from '../utils/sheets'
 import { standardizeNames } from '../utils/standardizeNames'
+import { useCoffeeStore } from '../stores/coffeeStore'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B6B']
 
@@ -27,15 +26,37 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null
 }
 
+// Loading skeleton for charts
+const ChartSkeleton = ({ height = 350 }: { height?: number }) => (
+  <div className="animate-pulse">
+    <div className="bg-base-300 rounded-lg" style={{ height: `${height}px` }}>
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center space-y-2">
+          <div className="loading loading-spinner loading-md"></div>
+          <p className="text-sm text-base-content/70">Loading chart...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
+
+
 export function StatsPage() {
-  const { data, isLoading: loading, error } = useCoffeeBeans()
+  const { loading, error, fetchBeans } = useCoffeeStore()
+  const standardizedBeans = useCoffeeStore(state => state.standardizedBeans)
+  
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchBeans()
+  }, [fetchBeans])
 
   // Memoized data processing for better performance
   const processedData = useMemo(() => {
-    if (!data?.length) return {}
-
-    // Standardize the data first
-    const standardizedData = standardizeNames(data)
+    if (!standardizedBeans?.length) return {}
+    
+    // Data is already standardized from the store
+    const standardizedData = standardizedBeans
 
     // Calculate summary statistics
     const totalBeans = standardizedData.length
@@ -113,8 +134,6 @@ export function StatsPage() {
       .slice(-12)
       .map(([month, count]) => ({ month, count }))
 
-
-
     // Top Machines
     const machineCounts = standardizedData.reduce((acc, bean) => {
       if (bean.espressoMachine) {
@@ -141,32 +160,32 @@ export function StatsPage() {
       .slice(0, 8)
       .map(([name, count]) => ({ name, count }))
 
-         // Roast Level Distribution
-     const roastLevels = standardizedData.reduce((acc, bean) => {
-       if (bean.roastLevel) {
-         acc[bean.roastLevel] = (acc[bean.roastLevel] || 0) + 1
-       }
-       return acc
-     }, {} as Record<string, number>)
+    // Roast Level Distribution
+    const roastLevels = standardizedData.reduce((acc, bean) => {
+      if (bean.roastLevel) {
+        acc[bean.roastLevel] = (acc[bean.roastLevel] || 0) + 1
+      }
+      return acc
+    }, {} as Record<string, number>)
 
-     const roastLevelDistribution = Object.entries(roastLevels)
-       .sort(([a], [b]) => a.localeCompare(b))
-       .map(([level, count]) => ({ level, count }))
+    const roastLevelDistribution = Object.entries(roastLevels)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([level, count]) => ({ level, count }))
 
-         return {
-       totalBeans,
-       averageRating,
-       uniqueRoasters,
-       uniqueOrigins,
-       topRoasters,
-       topOrigins,
-       ratingDistribution,
-       monthlyTrends,
-       topMachines,
-       topGrinders,
-       roastLevelDistribution
-     }
-  }, [data])
+    return {
+      totalBeans,
+      averageRating,
+      uniqueRoasters,
+      uniqueOrigins,
+      topRoasters,
+      topOrigins,
+      ratingDistribution,
+      monthlyTrends,
+      topMachines,
+      topGrinders,
+      roastLevelDistribution
+    }
+  }, [standardizedBeans])
 
   if (loading) {
     return (
@@ -185,7 +204,7 @@ export function StatsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="alert alert-error max-w-md">
           <FiBarChart2 className="w-6 h-6" />
-          <span>{error.message || 'Failed to load statistics'}</span>
+          <span>{error || 'Failed to load statistics'}</span>
         </div>
       </div>
     )
@@ -211,7 +230,7 @@ export function StatsPage() {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <FiBarChart2 className="w-8 h-8 text-primary" />
-          <h1 className="text-4xl font-bold ">
+          <h1 className="text-4xl font-bold">
             Coffee Bean Statistics
           </h1>
         </div>
@@ -265,22 +284,24 @@ export function StatsPage() {
               <FiBarChart2 className="w-5 h-5 text-primary" />
               <h2 className="card-title text-xl">Top Roasters</h2>
             </div>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={topRoasters} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis 
-                  dataKey="name" 
-                  angle={-45} 
-                  textAnchor="end" 
-                  height={100}
-                  tick={{ fontSize: 12 }}
-                  stroke="#6B7280"
-                />
-                <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" fill="#8884d8" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={topRoasters} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={100}
+                    tick={{ fontSize: 12 }}
+                    stroke="#6B7280"
+                  />
+                  <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="count" fill="#8884d8" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Suspense>
           </div>
         </div>
 
@@ -291,25 +312,27 @@ export function StatsPage() {
               <FiPieChart className="w-5 h-5 text-secondary" />
               <h2 className="card-title text-xl">Rating Distribution</h2>
             </div>
-            <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie
-                  data={ratingDistribution}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ range, percent }) => `${range} (${((percent || 0) * 100).toFixed(0)}%)`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="count"
-                >
-                  {ratingDistribution.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={ratingDistribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ range, percent }) => `${range} (${((percent || 0) * 100).toFixed(0)}%)`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="count"
+                  >
+                    {ratingDistribution.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </Suspense>
           </div>
         </div>
 
@@ -320,29 +343,29 @@ export function StatsPage() {
               <FiPieChart className="w-5 h-5 text-accent" />
               <h2 className="card-title text-xl">Top Origins</h2>
             </div>
-            <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie
-                  data={topOrigins}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {topOrigins.map((_entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={topOrigins}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {topOrigins.map((_entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </Suspense>
           </div>
         </div>
-
-
 
         {/* Monthly Trends Line Chart */}
         <div className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300">
@@ -351,16 +374,18 @@ export function StatsPage() {
               <FiTrendingUp className="w-5 h-5 text-info" />
               <h2 className="card-title text-xl">Monthly Bean Additions</h2>
             </div>
-            <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={monthlyTrends} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#6B7280" />
-                <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
-                <Tooltip content={<CustomTooltip />} />
-                <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={3} dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }} />
-                <Area type="monotone" dataKey="count" fill="#8884d8" fillOpacity={0.1} />
-              </LineChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={monthlyTrends} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#6B7280" />
+                  <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={3} dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }} />
+                  <Area type="monotone" dataKey="count" fill="#8884d8" fillOpacity={0.1} />
+                </LineChart>
+              </ResponsiveContainer>
+            </Suspense>
           </div>
         </div>
 
@@ -371,15 +396,17 @@ export function StatsPage() {
               <FiCoffee className="w-5 h-5 text-warning" />
               <h2 className="card-title text-xl">Top Espresso Machines</h2>
             </div>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={topMachines} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 12 }} stroke="#6B7280" />
-                <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" fill="#FF8042" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={topMachines} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 12 }} stroke="#6B7280" />
+                  <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="count" fill="#FF8042" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Suspense>
           </div>
         </div>
       </div>
@@ -393,15 +420,17 @@ export function StatsPage() {
               <FiCoffee className="w-5 h-5 text-warning" />
               <h2 className="card-title text-xl">Top Grinders</h2>
             </div>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={topGrinders} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 12 }} stroke="#6B7280" />
-                <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" fill="#FFBB28" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={topGrinders} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 12 }} stroke="#6B7280" />
+                  <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="count" fill="#FFBB28" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Suspense>
           </div>
         </div>
 
@@ -412,25 +441,27 @@ export function StatsPage() {
               <FiPieChart className="w-5 h-5 text-warning" />
               <h2 className="card-title text-xl">Roast Level Distribution</h2>
             </div>
-            <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie
-                  data={roastLevelDistribution}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ level, percent }) => `${level} (${((percent || 0) * 100).toFixed(0)}%)`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="count"
-                >
-                  {roastLevelDistribution.map((_entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartSkeleton />}>
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={roastLevelDistribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ level, percent }) => `${level} (${((percent || 0) * 100).toFixed(0)}%)`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="count"
+                  >
+                    {roastLevelDistribution.map((_entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </Suspense>
           </div>
         </div>
       </div>

@@ -1,22 +1,19 @@
 import { useState, useEffect } from 'react'
 import { FiSearch, FiFilter, FiX } from 'react-icons/fi'
-import type { CoffeeBean } from '../utils/sheets'
-import { standardizeNames } from '../utils/standardizeNames'
+import type { CoffeeBean } from '../types/coffee'
+import { useCoffeeStore } from '../stores/coffeeStore'
 
 interface FilterBarProps {
-  data: CoffeeBean[]
   onFilterChange: (filteredData: CoffeeBean[]) => void
 }
 
-export function FilterBar({ data, onFilterChange }: FilterBarProps) {
+export function FilterBar({ onFilterChange }: FilterBarProps) {
+  const standardizedData = useCoffeeStore(state => state.standardizedBeans)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedOrigin, setSelectedOrigin] = useState('')
   const [selectedRoaster, setSelectedRoaster] = useState('')
   const [minRating, setMinRating] = useState('')
   const [showFilters, setShowFilters] = useState(false)
-
-  // Standardize the data first
-  const standardizedData = standardizeNames(data)
 
   // Get unique values for dropdowns from standardized data
   const origins = Array.from(new Set(standardizedData.map(bean => bean.origin).filter(Boolean))).sort()
