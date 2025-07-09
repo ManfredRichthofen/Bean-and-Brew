@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { DataTable } from '../components/DataTable'
+import { DataTableWithSuspense } from '../components/lazy'
 import { FilterBar } from '../components/FilterBar'
 import { useCoffeeStore } from '../stores/coffeeStore'
 import type { CoffeeBean } from '../types/coffee'
@@ -45,7 +45,7 @@ export function HomePage() {
       <FilterBar onFilterChange={setFilteredData} />
 
       {/* Table */}
-      <DataTable filteredData={filteredData} />
+      <DataTableWithSuspense filteredData={filteredData} />
     </div>
   )
 } 

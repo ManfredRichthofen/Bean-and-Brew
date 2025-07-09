@@ -1,44 +1,15 @@
-import { useMemo, Suspense, useEffect } from 'react'
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Area
-} from 'recharts'
+import { useMemo, useEffect } from 'react'
 import { FiTrendingUp, FiStar, FiMapPin, FiCoffee, FiBarChart2, FiPieChart } from 'react-icons/fi'
-import { standardizeNames } from '../utils/standardizeNames'
 import { useCoffeeStore } from '../stores/coffeeStore'
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B6B']
-
-// Custom tooltip component for better styling
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-base-200 p-3 rounded-lg shadow-lg border border-base-300">
-        <p className="font-semibold">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} style={{ color: entry.color }}>
-            {entry.name}: {entry.value}
-          </p>
-        ))}
-      </div>
-    )
-  }
-  return null
-}
-
-// Loading skeleton for charts
-const ChartSkeleton = ({ height = 350 }: { height?: number }) => (
-  <div className="animate-pulse">
-    <div className="bg-base-300 rounded-lg" style={{ height: `${height}px` }}>
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-2">
-          <div className="loading loading-spinner loading-md"></div>
-          <p className="text-sm text-base-content/70">Loading chart...</p>
-        </div>
-      </div>
-    </div>
-  </div>
-)
+import {
+  TopRoastersChartWithSuspense,
+  RatingDistributionChartWithSuspense,
+  TopOriginsChartWithSuspense,
+  MonthlyTrendsChartWithSuspense,
+  TopMachinesChartWithSuspense,
+  TopGrindersChartWithSuspense,
+  RoastLevelDistributionChartWithSuspense
+} from '../components/lazy'
 
 
 
@@ -284,24 +255,7 @@ export function StatsPage() {
               <FiBarChart2 className="w-5 h-5 text-primary" />
               <h2 className="card-title text-xl">Top Roasters</h2>
             </div>
-            <Suspense fallback={<ChartSkeleton />}>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={topRoasters} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                  <XAxis 
-                    dataKey="name" 
-                    angle={-45} 
-                    textAnchor="end" 
-                    height={100}
-                    tick={{ fontSize: 12 }}
-                    stroke="#6B7280"
-                  />
-                  <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="count" fill="#8884d8" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </Suspense>
+            <TopRoastersChartWithSuspense data={topRoasters} />
           </div>
         </div>
 
@@ -312,27 +266,7 @@ export function StatsPage() {
               <FiPieChart className="w-5 h-5 text-secondary" />
               <h2 className="card-title text-xl">Rating Distribution</h2>
             </div>
-            <Suspense fallback={<ChartSkeleton />}>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                  <Pie
-                    data={ratingDistribution}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ range, percent }) => `${range} (${((percent || 0) * 100).toFixed(0)}%)`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="count"
-                  >
-                    {ratingDistribution.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </Suspense>
+            <RatingDistributionChartWithSuspense data={ratingDistribution} />
           </div>
         </div>
 
@@ -343,27 +277,7 @@ export function StatsPage() {
               <FiPieChart className="w-5 h-5 text-accent" />
               <h2 className="card-title text-xl">Top Origins</h2>
             </div>
-            <Suspense fallback={<ChartSkeleton />}>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                  <Pie
-                    data={topOrigins}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {topOrigins.map((_entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </Suspense>
+            <TopOriginsChartWithSuspense data={topOrigins} />
           </div>
         </div>
 
@@ -374,18 +288,7 @@ export function StatsPage() {
               <FiTrendingUp className="w-5 h-5 text-info" />
               <h2 className="card-title text-xl">Monthly Bean Additions</h2>
             </div>
-            <Suspense fallback={<ChartSkeleton />}>
-              <ResponsiveContainer width="100%" height={350}>
-                <LineChart data={monthlyTrends} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={3} dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }} />
-                  <Area type="monotone" dataKey="count" fill="#8884d8" fillOpacity={0.1} />
-                </LineChart>
-              </ResponsiveContainer>
-            </Suspense>
+            <MonthlyTrendsChartWithSuspense data={monthlyTrends} />
           </div>
         </div>
 
@@ -396,17 +299,7 @@ export function StatsPage() {
               <FiCoffee className="w-5 h-5 text-warning" />
               <h2 className="card-title text-xl">Top Espresso Machines</h2>
             </div>
-            <Suspense fallback={<ChartSkeleton />}>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={topMachines} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="count" fill="#FF8042" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </Suspense>
+            <TopMachinesChartWithSuspense data={topMachines} />
           </div>
         </div>
       </div>
@@ -420,17 +313,7 @@ export function StatsPage() {
               <FiCoffee className="w-5 h-5 text-warning" />
               <h2 className="card-title text-xl">Top Grinders</h2>
             </div>
-            <Suspense fallback={<ChartSkeleton />}>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={topGrinders} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="count" fill="#FFBB28" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </Suspense>
+            <TopGrindersChartWithSuspense data={topGrinders} />
           </div>
         </div>
 
@@ -441,27 +324,7 @@ export function StatsPage() {
               <FiPieChart className="w-5 h-5 text-warning" />
               <h2 className="card-title text-xl">Roast Level Distribution</h2>
             </div>
-            <Suspense fallback={<ChartSkeleton />}>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                  <Pie
-                    data={roastLevelDistribution}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ level, percent }) => `${level} (${((percent || 0) * 100).toFixed(0)}%)`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="count"
-                  >
-                    {roastLevelDistribution.map((_entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </Suspense>
+            <RoastLevelDistributionChartWithSuspense data={roastLevelDistribution} />
           </div>
         </div>
       </div>

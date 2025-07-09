@@ -4,7 +4,7 @@ import { FaStar } from 'react-icons/fa'
 import { FaStarHalfStroke } from 'react-icons/fa6'
 import type { CoffeeBean } from '../types/coffee'
 import { sortData, getColumnHeaders } from '../types/coffee'
-import { CoffeeDetailModal } from './CoffeeDetailModal'
+import { CoffeeDetailModalWithSuspense } from './lazy'
 import { useCoffeeStore } from '../stores/coffeeStore'
 
 interface DataTableProps {
@@ -447,7 +447,7 @@ export function DataTable({ filteredData }: DataTableProps = {}) {
         )}
       </div>
       {selectedCoffee && (
-        <CoffeeDetailModal
+        <CoffeeDetailModalWithSuspense
           coffee={selectedCoffee}
           isOpen={isModalOpen}
           onClose={closeModal}

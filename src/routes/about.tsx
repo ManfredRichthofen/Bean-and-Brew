@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Layout } from '../components/Layout'
-import { AboutPage } from '../pages/AboutPage'
+import { AboutPageWithSuspense } from '../pages/lazy'
 
 export const Route = createFileRoute('/about')({
   component: AboutPageComponent,
@@ -9,7 +9,7 @@ export const Route = createFileRoute('/about')({
 function AboutPageComponent() {
   return (
     <Layout currentPage="about">
-      <AboutPage />
+      <AboutPageWithSuspense />
     </Layout>
   )
 } 

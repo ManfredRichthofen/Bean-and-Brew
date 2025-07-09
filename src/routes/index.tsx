@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Layout } from '../components/Layout'
-import { HomePage } from '../pages/HomePage'
+import { HomePageWithSuspense } from '../pages/lazy'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -9,7 +9,7 @@ export const Route = createFileRoute('/')({
 function App() {
   return (
     <Layout currentPage="home">
-      <HomePage />
+      <HomePageWithSuspense />
     </Layout>
   )
 }

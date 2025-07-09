@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { StatsPage } from '../pages/StatsPage'
+import { StatsPageWithSuspense } from '../pages/lazy'
 import { Layout } from '../components/Layout'
 
 export const Route = createFileRoute('/stats')({
@@ -9,7 +9,7 @@ export const Route = createFileRoute('/stats')({
 function StatsRoute() {
   return (
     <Layout currentPage="stats">
-      <StatsPage />
+      <StatsPageWithSuspense />
     </Layout>
   )
 } 
