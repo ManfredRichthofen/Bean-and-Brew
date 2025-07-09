@@ -4,6 +4,7 @@ import { FaStar } from 'react-icons/fa'
 import { FaStarHalfStroke } from 'react-icons/fa6'
 import type { CoffeeBean } from '../utils/sheets'
 import { sortData, getColumnHeaders } from '../utils/sheets'
+import { standardizeNames } from '../utils/standardizeNames'
 import { CoffeeDetailModal } from './CoffeeDetailModal'
 
 interface DataTableProps {
@@ -20,6 +21,9 @@ export function DataTable({ data, loading, error }: DataTableProps) {
   const [hiddenColumns, setHiddenColumns] = useState<Set<keyof CoffeeBean>>(new Set())
   const [showColumnToggle, setShowColumnToggle] = useState(false)
   const headers = getColumnHeaders()
+
+  // Standardize the data for display
+  const standardizedData = standardizeNames(data)
 
   const handleSort = (column: keyof CoffeeBean) => {
     if (sortBy === column) {
@@ -51,7 +55,7 @@ export function DataTable({ data, loading, error }: DataTableProps) {
   }
 
   const visibleHeaders = headers.filter(header => !hiddenColumns.has(header.key))
-  const sortedData = sortData(data, sortBy, sortOrder)
+  const sortedData = sortData(standardizedData, sortBy, sortOrder)
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '-'

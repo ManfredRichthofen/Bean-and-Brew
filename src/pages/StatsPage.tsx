@@ -6,6 +6,7 @@ import {
 import { FiTrendingUp, FiStar, FiMapPin, FiCoffee, FiBarChart2, FiPieChart } from 'react-icons/fi'
 import { fetchSheetData } from '../utils/sheets'
 import type { CoffeeBean } from '../utils/sheets'
+import { standardizeNames } from '../utils/standardizeNames'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B6B']
 
@@ -47,17 +48,20 @@ export function StatsPage() {
   const processedData = useMemo(() => {
     if (!data.length) return {}
 
+    // Standardize the data first
+    const standardizedData = standardizeNames(data)
+
     // Calculate summary statistics
-    const totalBeans = data.length
-    const beansWithRating = data.filter(bean => bean.rating && !isNaN(parseFloat(bean.rating)))
+    const totalBeans = standardizedData.length
+    const beansWithRating = standardizedData.filter(bean => bean.rating && !isNaN(parseFloat(bean.rating)))
     const averageRating = beansWithRating.length > 0 
       ? beansWithRating.reduce((sum, bean) => sum + parseFloat(bean.rating), 0) / beansWithRating.length 
       : 0
-    const uniqueRoasters = new Set(data.map(bean => bean.roaster).filter(Boolean)).size
-    const uniqueOrigins = new Set(data.map(bean => bean.origin).filter(Boolean)).size
+    const uniqueRoasters = new Set(standardizedData.map(bean => bean.roaster).filter(Boolean)).size
+    const uniqueOrigins = new Set(standardizedData.map(bean => bean.origin).filter(Boolean)).size
 
     // Top Roasters
-    const roasterCounts = data.reduce((acc, bean) => {
+    const roasterCounts = standardizedData.reduce((acc, bean) => {
       if (bean.roaster) {
         acc[bean.roaster] = (acc[bean.roaster] || 0) + 1
       }
@@ -65,12 +69,12 @@ export function StatsPage() {
     }, {} as Record<string, number>)
 
     const topRoasters = Object.entries(roasterCounts)
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, a], [, b]) => (b as number) - (a as number))
       .slice(0, 10)
       .map(([name, count]) => ({ name, count }))
 
     // Top Origins
-    const originCounts = data.reduce((acc, bean) => {
+    const originCounts = standardizedData.reduce((acc, bean) => {
       if (bean.origin) {
         acc[bean.origin] = (acc[bean.origin] || 0) + 1
       }
@@ -78,7 +82,7 @@ export function StatsPage() {
     }, {} as Record<string, number>)
 
     const topOrigins = Object.entries(originCounts)
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, a], [, b]) => (b as number) - (a as number))
       .slice(0, 8)
       .map(([name, value]) => ({ name, value }))
 
@@ -92,7 +96,7 @@ export function StatsPage() {
       'Below 5': 0
     }
 
-    data.forEach(bean => {
+    standardizedData.forEach(bean => {
       const rating = parseFloat(bean.rating)
       if (!isNaN(rating)) {
         if (rating >= 9) ratingRanges['9-10']++
@@ -107,7 +111,7 @@ export function StatsPage() {
     const ratingDistribution = Object.entries(ratingRanges).map(([range, count]) => ({ range, count }))
 
     // Monthly Trends
-    const monthlyData = data.reduce((acc, bean) => {
+    const monthlyData = standardizedData.reduce((acc, bean) => {
       if (bean.roastDate) {
         const date = new Date(bean.roastDate)
         if (!isNaN(date.getTime())) {
@@ -124,7 +128,7 @@ export function StatsPage() {
       .map(([month, count]) => ({ month, count }))
 
     // Average Rating by Origin
-    const originRatings = data.reduce((acc, bean) => {
+    const originRatings = standardizedData.reduce((acc, bean) => {
       if (bean.origin && bean.rating) {
         const rating = parseFloat(bean.rating)
         if (!isNaN(rating)) {
@@ -139,15 +143,18 @@ export function StatsPage() {
     }, {} as Record<string, { total: number; count: number }>)
 
     const averageRatingByOrigin = Object.entries(originRatings)
-      .map(([origin, { total, count }]) => ({
-        origin,
-        averageRating: total / count
-      }))
+      .map(([origin, data]) => {
+        const { total, count } = data as { total: number; count: number }
+        return {
+          origin,
+          averageRating: total / count
+        }
+      })
       .sort((a, b) => b.averageRating - a.averageRating)
       .slice(0, 10)
 
     // Top Machines
-    const machineCounts = data.reduce((acc, bean) => {
+    const machineCounts = standardizedData.reduce((acc, bean) => {
       if (bean.espressoMachine) {
         acc[bean.espressoMachine] = (acc[bean.espressoMachine] || 0) + 1
       }
@@ -155,12 +162,12 @@ export function StatsPage() {
     }, {} as Record<string, number>)
 
     const topMachines = Object.entries(machineCounts)
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, a], [, b]) => (b as number) - (a as number))
       .slice(0, 8)
       .map(([name, count]) => ({ name, count }))
 
     // Top Grinders
-    const grinderCounts = data.reduce((acc, bean) => {
+    const grinderCounts = standardizedData.reduce((acc, bean) => {
       if (bean.grinder) {
         acc[bean.grinder] = (acc[bean.grinder] || 0) + 1
       }
@@ -168,12 +175,12 @@ export function StatsPage() {
     }, {} as Record<string, number>)
 
     const topGrinders = Object.entries(grinderCounts)
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, a], [, b]) => (b as number) - (a as number))
       .slice(0, 8)
       .map(([name, count]) => ({ name, count }))
 
          // Roast Level Distribution
-     const roastLevels = data.reduce((acc, bean) => {
+     const roastLevels = standardizedData.reduce((acc, bean) => {
        if (bean.roastLevel) {
          acc[bean.roastLevel] = (acc[bean.roastLevel] || 0) + 1
        }

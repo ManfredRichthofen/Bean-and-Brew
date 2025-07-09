@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { FiSearch, FiFilter, FiX } from 'react-icons/fi'
 import type { CoffeeBean } from '../utils/sheets'
+import { standardizeNames } from '../utils/standardizeNames'
 
 interface FilterBarProps {
   data: CoffeeBean[]
@@ -14,12 +15,15 @@ export function FilterBar({ data, onFilterChange }: FilterBarProps) {
   const [minRating, setMinRating] = useState('')
   const [showFilters, setShowFilters] = useState(false)
 
-  // Get unique values for dropdowns
-  const origins = Array.from(new Set(data.map(bean => bean.origin).filter(Boolean))).sort()
-  const roasters = Array.from(new Set(data.map(bean => bean.roaster).filter(Boolean))).sort()
+  // Standardize the data first
+  const standardizedData = standardizeNames(data)
+
+  // Get unique values for dropdowns from standardized data
+  const origins = Array.from(new Set(standardizedData.map(bean => bean.origin).filter(Boolean))).sort()
+  const roasters = Array.from(new Set(standardizedData.map(bean => bean.roaster).filter(Boolean))).sort()
 
   useEffect(() => {
-    let filteredData = data
+    let filteredData = standardizedData
 
     // Apply search filter
     if (searchTerm.trim()) {
@@ -52,7 +56,7 @@ export function FilterBar({ data, onFilterChange }: FilterBarProps) {
     }
 
     onFilterChange(filteredData)
-  }, [searchTerm, selectedOrigin, selectedRoaster, minRating, data, onFilterChange])
+  }, [searchTerm, selectedOrigin, selectedRoaster, minRating, standardizedData, onFilterChange])
 
   const clearFilters = () => {
     setSearchTerm('')

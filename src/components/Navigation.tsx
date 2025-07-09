@@ -57,16 +57,16 @@ export function Navigation({ currentPage = 'home' }: NavigationProps) {
             Home
           </Link>
           <Link 
-            to="/about" 
-            className={`btn btn-ghost btn-sm ${currentPage === 'about' ? 'btn-active' : ''}`}
-          >
-            About
-          </Link>
-          <Link 
             to="/stats" 
             className={`btn btn-ghost btn-sm ${currentPage === 'stats' ? 'btn-active' : ''}`}
           >
             Stats
+          </Link>
+          <Link 
+            to="/about" 
+            className={`btn btn-ghost btn-sm ${currentPage === 'about' ? 'btn-active' : ''}`}
+          >
+            About
           </Link>
           <ThemeToggle />
         </div>
