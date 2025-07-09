@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Area
 } from 'recharts'
 import { FiTrendingUp, FiStar, FiMapPin, FiCoffee, FiBarChart2, FiPieChart } from 'react-icons/fi'
-import { fetchSheetData } from '../utils/sheets'
+import { useCoffeeBeans } from '../utils/sheets'
 import type { CoffeeBean } from '../utils/sheets'
 import { standardizeNames } from '../utils/standardizeNames'
 
@@ -28,25 +28,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 }
 
 export function StatsPage() {
-  const [data, setData] = useState<CoffeeBean[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchSheetData()
-      .then((beans) => {
-        setData(beans)
-        setLoading(false)
-      })
-      .catch(() => {
-        setError('Failed to fetch data')
-        setLoading(false)
-      })
-  }, [])
+  const { data, isLoading: loading, error } = useCoffeeBeans()
 
   // Memoized data processing for better performance
   const processedData = useMemo(() => {
-    if (!data.length) return {}
+    if (!data?.length) return {}
 
     // Standardize the data first
     const standardizedData = standardizeNames(data)
@@ -127,31 +113,7 @@ export function StatsPage() {
       .slice(-12)
       .map(([month, count]) => ({ month, count }))
 
-    // Average Rating by Origin
-    const originRatings = standardizedData.reduce((acc, bean) => {
-      if (bean.origin && bean.rating) {
-        const rating = parseFloat(bean.rating)
-        if (!isNaN(rating)) {
-          if (!acc[bean.origin]) {
-            acc[bean.origin] = { total: 0, count: 0 }
-          }
-          acc[bean.origin].total += rating
-          acc[bean.origin].count++
-        }
-      }
-      return acc
-    }, {} as Record<string, { total: number; count: number }>)
 
-    const averageRatingByOrigin = Object.entries(originRatings)
-      .map(([origin, data]) => {
-        const { total, count } = data as { total: number; count: number }
-        return {
-          origin,
-          averageRating: total / count
-        }
-      })
-      .sort((a, b) => b.averageRating - a.averageRating)
-      .slice(0, 10)
 
     // Top Machines
     const machineCounts = standardizedData.reduce((acc, bean) => {
@@ -200,7 +162,6 @@ export function StatsPage() {
        topOrigins,
        ratingDistribution,
        monthlyTrends,
-       averageRatingByOrigin,
        topMachines,
        topGrinders,
        roastLevelDistribution
@@ -224,7 +185,7 @@ export function StatsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="alert alert-error max-w-md">
           <FiBarChart2 className="w-6 h-6" />
-          <span>{error}</span>
+          <span>{error.message || 'Failed to load statistics'}</span>
         </div>
       </div>
     )
@@ -239,7 +200,6 @@ export function StatsPage() {
     topOrigins = [],
     ratingDistribution = [],
     monthlyTrends = [],
-    averageRatingByOrigin = [],
     topMachines = [],
     topGrinders = [],
     roastLevelDistribution = []
@@ -382,24 +342,7 @@ export function StatsPage() {
           </div>
         </div>
 
-        {/* Average Rating by Origin - Horizontal Bar Chart */}
-        <div className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300">
-          <div className="card-body">
-            <div className="flex items-center gap-2 mb-4">
-              <FiBarChart2 className="w-5 h-5 text-success" />
-              <h2 className="card-title text-xl">Average Rating by Origin</h2>
-            </div>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={averageRatingByOrigin} layout="horizontal" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis type="number" domain={[0, 10]} tick={{ fontSize: 12 }} stroke="#6B7280" />
-                <YAxis dataKey="origin" type="category" width={100} tick={{ fontSize: 12 }} stroke="#6B7280" />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="averageRating" fill="#00C49F" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+
 
         {/* Monthly Trends Line Chart */}
         <div className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300">

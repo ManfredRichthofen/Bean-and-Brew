@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { FiChevronUp, FiChevronDown, FiExternalLink, FiEye, FiEyeOff } from 'react-icons/fi'
 import { FaStar } from 'react-icons/fa'
 import { FaStarHalfStroke } from 'react-icons/fa6'
 import type { CoffeeBean } from '../utils/sheets'
 import { sortData, getColumnHeaders } from '../utils/sheets'
-import { standardizeNames } from '../utils/standardizeNames'
 import { CoffeeDetailModal } from './CoffeeDetailModal'
 
 interface DataTableProps {
@@ -22,8 +21,10 @@ export function DataTable({ data, loading, error }: DataTableProps) {
   const [showColumnToggle, setShowColumnToggle] = useState(false)
   const headers = getColumnHeaders()
 
-  // Standardize the data for display
-  const standardizedData = standardizeNames(data)
+  // Memoize the sorted data to prevent re-sorting on every render
+  const sortedData = useMemo(() => {
+    return sortData(data, sortBy, sortOrder)
+  }, [data, sortBy, sortOrder])
 
   const handleSort = (column: keyof CoffeeBean) => {
     if (sortBy === column) {
@@ -55,7 +56,6 @@ export function DataTable({ data, loading, error }: DataTableProps) {
   }
 
   const visibleHeaders = headers.filter(header => !hiddenColumns.has(header.key))
-  const sortedData = sortData(standardizedData, sortBy, sortOrder)
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '-'

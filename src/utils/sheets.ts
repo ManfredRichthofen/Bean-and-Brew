@@ -34,6 +34,35 @@ export interface CoffeeBean {
   redditUsername: string
 }
 
+// TanStack Query hook for fetching coffee beans data
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { standardizeNames } from './standardizeNames'
+
+export const useCoffeeBeans = () => {
+  return useQuery({
+    queryKey: ['coffee-beans'],
+    queryFn: async () => {
+      const rawData = await fetchSheetData()
+      // Standardize the data once when fetched
+      return standardizeNames(rawData)
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes (reduced for memory efficiency)
+    retry: 2, // Reduced retries
+    refetchOnWindowFocus: false,
+    refetchOnMount: false, // Don't refetch on mount if data exists
+  })
+}
+
+// Utility function to invalidate and refetch coffee beans data
+export const useInvalidateCoffeeBeans = () => {
+  const queryClient = useQueryClient()
+  
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ['coffee-beans'] })
+  }
+}
+
 export async function fetchSheetData(): Promise<CoffeeBean[]> {
   const response = await fetch(SHEET_CSV_URL)
   if (!response.ok) {

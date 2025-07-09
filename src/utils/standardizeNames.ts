@@ -45,12 +45,6 @@ const ROASTER_STANDARDIZATION: Record<string, string> = {
   'onyx': 'Onyx',
   'onyx coffee': 'Onyx',
   'onyx coffee lab': 'Onyx',
-  
-  // Four Barrel variations
-  'four barrel': 'Four Barrel',
-  'four barrel coffee': 'Four Barrel',
-  '4 barrel': 'Four Barrel',
-  '4 barrel coffee': 'Four Barrel',
 
   //Café du Jour
   'cafe du jour': 'Café du Jour',

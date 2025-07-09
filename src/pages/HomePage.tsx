@@ -1,28 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
-import { fetchSheetData } from '../utils/sheets'
+import { useCoffeeBeans } from '../utils/sheets'
 import type { CoffeeBean } from '../utils/sheets'
 import { DataTable } from '../components/DataTable'
 import { FilterBar } from '../components/FilterBar'
 
 export function HomePage() {
-  const [data, setData] = useState<CoffeeBean[]>([])
   const [filteredData, setFilteredData] = useState<CoffeeBean[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data: allData = [], isLoading: loading, error } = useCoffeeBeans()
 
+  // Update filtered data when all data changes
   useEffect(() => {
-    fetchSheetData()
-      .then((beans) => {
-        setData(beans)
-        setFilteredData(beans)
-        setLoading(false)
-      })
-      .catch(() => {
-        setError('Failed to fetch data')
-        setLoading(false)
-      })
-  }, [])
+    setFilteredData(allData)
+  }, [allData])
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -53,10 +43,10 @@ export function HomePage() {
       </div>
 
       {/* Filters */}
-      <FilterBar data={data} onFilterChange={setFilteredData} />
+      <FilterBar data={allData} onFilterChange={setFilteredData} />
 
       {/* Table */}
-      <DataTable data={filteredData} loading={loading} error={error} />
+      <DataTable data={filteredData} loading={loading} error={error?.message || null} />
     </div>
   )
 } 
