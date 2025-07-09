@@ -58,45 +58,45 @@ export const LazyCoffeeDetailModal = lazy(() =>
   }))
 )
 
-// Lazy-loaded chart components
+// Lazy-loaded chart components - individually code-split
 export const LazyTopRoastersChart = lazy(() => 
-  import('./Charts').then(module => ({ 
+  import('./charts/TopRoastersChart').then(module => ({ 
     default: module.TopRoastersChart 
   }))
 )
 
 export const LazyRatingDistributionChart = lazy(() => 
-  import('./Charts').then(module => ({ 
+  import('./charts/RatingDistributionChart').then(module => ({ 
     default: module.RatingDistributionChart 
   }))
 )
 
 export const LazyTopOriginsChart = lazy(() => 
-  import('./Charts').then(module => ({ 
+  import('./charts/TopOriginsChart').then(module => ({ 
     default: module.TopOriginsChart 
   }))
 )
 
 export const LazyMonthlyTrendsChart = lazy(() => 
-  import('./Charts').then(module => ({ 
+  import('./charts/MonthlyTrendsChart').then(module => ({ 
     default: module.MonthlyTrendsChart 
   }))
 )
 
 export const LazyTopMachinesChart = lazy(() => 
-  import('./Charts').then(module => ({ 
+  import('./charts/TopMachinesChart').then(module => ({ 
     default: module.TopMachinesChart 
   }))
 )
 
 export const LazyTopGrindersChart = lazy(() => 
-  import('./Charts').then(module => ({ 
+  import('./charts/TopGrindersChart').then(module => ({ 
     default: module.TopGrindersChart 
   }))
 )
 
 export const LazyRoastLevelDistributionChart = lazy(() => 
-  import('./Charts').then(module => ({ 
+  import('./charts/RoastLevelDistributionChart').then(module => ({ 
     default: module.RoastLevelDistributionChart 
   }))
 )

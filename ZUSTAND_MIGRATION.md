@@ -124,9 +124,13 @@ export const DataTableWithSuspense = (props: any) => (
 )
 ```
 
-#### 3. Chart Library Splitting
+#### 3. Individual Chart Code Splitting
+Each chart type is now in its own file for maximum optimization:
+
 ```typescript
-// src/components/Charts.tsx - Separate file for all chart components
+// src/components/charts/TopRoastersChart.tsx
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
 export const TopRoastersChart = ({ data }: { data: any[] }) => (
   <ResponsiveContainer width="100%" height={350}>
     <BarChart data={data}>
@@ -137,11 +141,20 @@ export const TopRoastersChart = ({ data }: { data: any[] }) => (
 
 // Individual lazy-loaded chart components
 export const LazyTopRoastersChart = lazy(() => 
-  import('./Charts').then(module => ({ 
+  import('./charts/TopRoastersChart').then(module => ({ 
     default: module.TopRoastersChart 
   }))
 )
 ```
+
+**Chart Files Created:**
+- `TopRoastersChart.tsx` - Bar chart for top roasters
+- `RatingDistributionChart.tsx` - Pie chart for rating distribution  
+- `TopOriginsChart.tsx` - Pie chart for top origins
+- `MonthlyTrendsChart.tsx` - Line chart for monthly trends
+- `TopMachinesChart.tsx` - Bar chart for top machines
+- `TopGrindersChart.tsx` - Bar chart for top grinders
+- `RoastLevelDistributionChart.tsx` - Pie chart for roast levels
 
 #### 4. Route Updates
 ```typescript
@@ -158,6 +171,7 @@ import { HomePageWithSuspense } from '../pages/lazy'
 - **⚡ Progressive Loading**: Components load as needed with loading skeletons
 - **🎯 Better User Experience**: Immediate feedback with themed loading states
 - **📱 Mobile Optimized**: Reduced initial payload for mobile users
+- **📊 Granular Chart Loading**: Each chart type loads independently
 
 ### Loading States
 - **HomePage**: Coffee-themed loading with bean icon
@@ -165,6 +179,29 @@ import { HomePageWithSuspense } from '../pages/lazy'
 - **AboutPage**: Info-themed loading with info icon
 - **DataTable**: Table skeleton with animated rows
 - **Charts**: Chart skeleton with loading spinner
+
+### Bundle Structure After Individual Chart Splitting
+```
+Initial Bundle:
+├── Core app (Layout, Navigation, etc.)
+├── Zustand store
+├── Basic utilities
+└── Loading skeletons
+
+Lazy Bundles:
+├── HomePage + DataTable + FilterBar
+├── StatsPage (without charts)
+├── AboutPage
+├── CoffeeDetailModal
+└── Individual Chart Bundles:
+    ├── TopRoastersChart (BarChart components)
+    ├── RatingDistributionChart (PieChart components)
+    ├── TopOriginsChart (PieChart components)
+    ├── MonthlyTrendsChart (LineChart components)
+    ├── TopMachinesChart (BarChart components)
+    ├── TopGrindersChart (BarChart components)
+    └── RoastLevelDistributionChart (PieChart components)
+```
 
 ## Migration Summary
 ✅ **Complete**: All components migrated to use on-demand standardization

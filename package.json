@@ -22,6 +22,7 @@
     "react-icons": "^5.5.0",
     "recharts": "^3.0.2",
     "tailwindcss": "^4.0.6",
+    "vite-bundle-visualizer": "^1.2.1",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
